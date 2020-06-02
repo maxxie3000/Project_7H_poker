@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun May 31 16:40:02 2020
+
+@author: Max
+"""
+
+
+import Prob_poker as pp
+import random as rd
+
+def straight(list_t):
+    list_t.sort()
+    if list_t == []:
+        return False 
+    list_a = list_t[:-2]
+
+    list_b = list_t[1:-1]
+
+    list_c = list_t[2:]
+
+
+    st = False
+    if list_t[:-2] == list(range(list_a[0], list_a[-1]+1)):
+        st = True
+    elif list_b == list(range(list_b[0],list_b[-1]+1)):
+        st = True
+    elif list_c == list(range(list_c[0],list_c[-1]+1)):
+        st = True
+    return st
+    """
+    for l in range(len(list)-1):
+      if list[l+1] - list[l] == 1:
+         streak += 1
+      elif streak >= 5:
+         st = True
+      else:
+         streak = 0
+    if streak >= 5:
+         st = True
+         return st
+    else:
+        return st
+    """
+
+def run_simulations(n, hand=None, deck=None):
+    if hand == None:
+        deck = pp.generate_deck()
+        hand, deck, pocket = pp.generate_hand(deck)
+    print(hand)
+    d_outcomes = {"sf":0, "4k":0, "fh":0, "fl":0, "st":0, "3k":0,"2p":0,"1p":0,"No":0}
+    
+    for n in range(n):
+        print('Round number: {0}'.format(n))
+        deck = pp.generate_deck()
+        hand, deck, pocket = pp.generate_hand(deck)
+        deck = pp.generate_deck()
+        for h in hand:
+           deck.remove(h)
+        community_cards = []
+        kinds = {"Hearts":[], "Diamonds":[], "clubs":[], "Spades":[]}
+        numbers = {}
+        for n in range(2,15):
+            numbers[n] = 0
+        random_index = 0
+        
+        for n in range(5):
+            random_index = rd.randint(0,len(deck)-1)
+            card = deck.pop(random_index)
+            community_cards.append(card)
+        
+        total_cards = hand + community_cards
+        flush = False
+        sf = False
+        st = False
+        nk_list = []
+        n_list = []
+        
+        for c in total_cards: 
+            kinds[c[0]].append(c[1]) 
+            numbers[c[1]] += 1
+            n_list.append(c[1])
+        for k in kinds:
+            if len(kinds[k]) >= 5:
+                flush = True
+                sf = straight(kinds[k])
+          
+            """  
+           if kinds[c[0]] >= 5:
+                flush = c[0]
+                for k in total_cards:
+                    if k[0] == flush:
+                        nk_list.append(k[1])
+                """
+        
+        if straight(nk_list):
+            sf = True
+        
+        if straight(n_list):
+            st = True
+        
+       #check for combinations         
+        if sf == True:
+            d_outcomes["sf"] += 1
+        elif 4 in numbers.values():
+            d_outcomes["4k"] += 1
+        elif 2 in numbers.values() and 3 in numbers.values():
+            d_outcomes["fh"] += 1
+        elif flush == True:
+            d_outcomes["fl"] += 1
+        elif st == True:
+            d_outcomes["st"] += 1
+            
+        elif 3 in numbers.values():
+            d_outcomes["3k"] += 1
+        elif sum(value == 2 for value in numbers.values()) >= 2:
+            d_outcomes["2p"] += 1
+        elif 2 in numbers.values():
+            d_outcomes["1p"] += 1
+        else:
+            d_outcomes["No"] += 1
+        
+    print(d_outcomes)
+    return
+
+run_simulations(5000000)
+
+"""
+#straight tester
+for n in range(100):
+    list = []
+    a = False
+    list_n = [2,3,4,5,6,7,8,9,10,11,12,13,14]
+    for x in range(8):
+        random_index = rd.randint(0,len(list_n)-1)
+        card = list_n[random_index]
+        list.append(card)
+    list.sort()
+    print(list)
+    a = straight(list)
+    if a == True:
+        print("Succes")
+        """
+    
